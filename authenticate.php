@@ -1,6 +1,6 @@
 <?php
-
-declare(strict_types=1);
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
 
 use \Firebase\JWT\JWT;
 
@@ -12,8 +12,8 @@ $rest_json = file_get_contents("php://input");
 $_POST = json_decode($rest_json, true);
 if (isset($_POST['user'])) {
     $user = $_POST['user'];
-    $username = $user['username'];
-    $foundUser = db_fetch_row("SELECT * FROM $omega_app_manager_user WHERE user_name = '$username'");
+    $email = $user['email'];
+    $foundUser = db_fetch_row("SELECT * FROM $omega_app_manager_user WHERE email = '$email'");
     $hasValidCredentials = false;
 
     if (count($foundUser) > 0) {
@@ -22,30 +22,40 @@ if (isset($_POST['user'])) {
     }
 
     if ($hasValidCredentials) {
-        $secretKey  = 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=';
+        $secretKey  = $jwt_secret;
         $tokenId    = base64_encode(random_bytes(16));
         $issuedAt   = new DateTimeImmutable();
-        $expire     = $issuedAt->modify('+6 minutes')->getTimestamp();      // Add 60 seconds
-        $serverName = "your.domain.name";
-        $username   = "username";                                           // Retrieved from filtered POST data
+        $expiresIn  = $issuedAt->modify('+30 days')->getTimestamp();
+        $userName   = $foundUser["user_name"];
+        $userEmail = $foundUser["email"];
 
         // Create the token as an array
         $data = [
-            'iat'  => $issuedAt,         // Issued at: time when the token was generated
-            'jti'  => $tokenId,          // Json Token Id: an unique identifier for the token
-            'iss'  => $serverName,       // Issuer
-            'nbf'  => $issuedAt,         // Not before
-            'exp'  => $expire,           // Expire
-            'data' => [                  // Data related to the signer user
-                'userName' => $username, // User name
+            'iat'  => $issuedAt,
+            'jti'  => $tokenId,
+            'nbf'  => $issuedAt,
+            'exp'  => $expiresIn,
+            'data' => [
+                'userName' => $userName,
+                'userEmail' => $userEmail,
             ]
         ];
 
         // Encode the array to a JWT string.
-        echo JWT::encode(
+        $token =  JWT::encode(
             $data,      //Data to be encoded in the JWT
             $secretKey, // The signing key
             'HS512'     // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
         );
+
+        $result = [
+            'token' => $token,
+            'tokenId' => $tokenId,
+            'expiresIn' => $expiresIn
+        ];
+
+        echo json_encode($result);
+    } else {
+        http_response_code(404);
     }
 }
