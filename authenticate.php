@@ -29,11 +29,11 @@ if (isset($_POST['user'])) {
         $userName   = $foundUser["user_name"];
         $userEmail = $foundUser["email"];
 
-        // Create the token as an array
-        $data = [
-            'iat'  => $issuedAt,
+        $tokenData = [
+            'iat'  => $issuedAt->getTimestamp(),
             'jti'  => $tokenId,
-            'nbf'  => $issuedAt,
+            'iss'  => $serverName,
+            'nbf'  => $issuedAt->getTimestamp(),
             'exp'  => $expiresIn,
             'data' => [
                 'userName' => $userName,
@@ -41,11 +41,10 @@ if (isset($_POST['user'])) {
             ]
         ];
 
-        // Encode the array to a JWT string.
         $token =  JWT::encode(
-            $data,      //Data to be encoded in the JWT
-            $secretKey, // The signing key
-            'HS512'     // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+            $tokenData,      
+            $secretKey, 
+            'HS512'     
         );
 
         $result = [

@@ -3,7 +3,6 @@ import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { Layout } from 'antd';
-import { Content } from 'antd/lib/layout/layout';
 import * as actions from './store/actions/index';
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import './App.css';

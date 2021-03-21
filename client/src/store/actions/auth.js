@@ -44,12 +44,11 @@ export const checkAuthTimeout = expirationTime => {
 export const auth = (email, password) => {
 	return dispatch => {
 		dispatch(authStart());
-		const authData = { email, password };
 
 		axios
-			.post(authPath, {user:{email,password}})
+			.post(authPath, { user: { email, password } })
 			.then(result => {
-				console.log('result',result);
+				console.log('result', result);
 				const expirationDate = new Date(new Date().getTime() + result.data.expiresIn);
 				localStorage.setItem('token', result.data.token);
 				localStorage.setItem('expirationDate', expirationDate);

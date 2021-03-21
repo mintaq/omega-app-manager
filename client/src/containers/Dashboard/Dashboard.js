@@ -1,15 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import * as actions from '../../store/actions';
 import { Layout, Menu, Breadcrumb } from 'antd';
-import {
-	DesktopOutlined,
-	PieChartOutlined,
-	FileOutlined,
-	TeamOutlined,
-	UserOutlined,
-} from '@ant-design/icons';
+import { PieChartOutlined, FileOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import DataTable from '../../components/DataTable/DataTable';
 import './Dashboard.css';
 
-const { Header, Content, Sider, Footer } = Layout;
+const { Header, Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
 class Dashboard extends React.Component {
@@ -29,14 +26,13 @@ class Dashboard extends React.Component {
 				<Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse} position="fixed">
 					<div className="logoz" />
 					<Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-						<Menu.Item key="1" icon={<PieChartOutlined />}>
-							Option 1
+						<Menu.Item key="1" icon={<PieChartOutlined />} onClick={() => console.log('op1')}>
+							Dashboard
 						</Menu.Item>
-						<Menu.Item key="2" icon={<DesktopOutlined />}>
-							Option 2
-						</Menu.Item>
-						<SubMenu key="sub1" icon={<UserOutlined />} title="User">
-							<Menu.Item key="3">Tom</Menu.Item>
+						<SubMenu key="sub1" icon={<UserOutlined />} title="Apps">
+							<Menu.Item key="3" onClick={() => this.props.onFetchApp('1')}>
+								Google Feed Pro
+							</Menu.Item>
 							<Menu.Item key="4">Bill</Menu.Item>
 							<Menu.Item key="5">Alex</Menu.Item>
 						</SubMenu>
@@ -57,14 +53,25 @@ class Dashboard extends React.Component {
 							<Breadcrumb.Item>Bill</Breadcrumb.Item>
 						</Breadcrumb>
 						<div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-							Bill is a cat.
+							<DataTable />
 						</div>
 					</Content>
-					{/* <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer> */}
 				</Layout>
 			</Layout>
 		);
 	}
 }
 
-export default Dashboard;
+const mapStateToProps = state => {
+	return {
+		app: state.app.app,
+	};
+};
+
+const mapDispatchToProps = dispatch => {
+	return {
+		onFetchApp: appId => dispatch(actions.fetchAppById(appId)),
+	};
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
